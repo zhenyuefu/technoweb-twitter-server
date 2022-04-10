@@ -27,7 +27,7 @@ export = (app: express.Application) => {
   // CORS跨域
   app.use(
     cors({
-      origin: "http://localhost:3000",
+      origin: true,
       credentials: true,
     })
   );
