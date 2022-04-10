@@ -39,7 +39,6 @@ export = (app: express.Application) => {
     session({
       secret: SESSION_SECRET,
       resave: false,
-      saveUninitialized: false,
       store: MongoStore.create({
         mongoUrl: uri,
         stringify: false,
