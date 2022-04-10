@@ -35,6 +35,8 @@ export = (app: express.Application) => {
   // 解析请求体数据
   app.use(express.json());
 
+  app.enable("trust proxy");
+
   app.use(
     session({
       secret: SESSION_SECRET,
@@ -46,6 +48,7 @@ export = (app: express.Application) => {
         // 每天只更新1次
         touchAfter: 24 * 3600,
       }),
+      proxy: true,
       cookie: {
         sameSite: "none",
         secure: true,
