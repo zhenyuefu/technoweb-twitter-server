@@ -39,6 +39,7 @@ export = (app: express.Application) => {
     session({
       secret: SESSION_SECRET,
       resave: false,
+      saveUninitialized: false,
       store: MongoStore.create({
         mongoUrl: uri,
         stringify: false,
@@ -46,8 +47,8 @@ export = (app: express.Application) => {
         touchAfter: 24 * 3600,
       }),
       cookie: {
-        sameSite: false,
-        secure:true
+        sameSite: false
+        // secure:true
       }
     })
   );
