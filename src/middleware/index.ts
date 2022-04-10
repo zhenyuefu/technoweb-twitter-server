@@ -48,6 +48,7 @@ export = (app: express.Application) => {
       }),
       cookie: {
         sameSite: false,
+        secure:true
       }
     })
   );
