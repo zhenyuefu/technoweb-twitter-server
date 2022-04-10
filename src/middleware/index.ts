@@ -47,8 +47,8 @@ export = (app: express.Application) => {
         touchAfter: 24 * 3600,
       }),
       cookie: {
-        sameSite: false
-        // secure:true
+        sameSite: "none",
+        secure: process.env.NODE_ENV !== "development"
       }
     })
   );
