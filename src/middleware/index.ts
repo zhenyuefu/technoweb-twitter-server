@@ -46,6 +46,9 @@ export = (app: express.Application) => {
         // 每天只更新1次
         touchAfter: 24 * 3600,
       }),
+      cookie: {
+        sameSite: false,
+      }
     })
   );
 
