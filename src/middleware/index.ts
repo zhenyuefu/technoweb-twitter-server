@@ -48,7 +48,8 @@ export = (app: express.Application) => {
       }),
       cookie: {
         sameSite: "none",
-        secure: process.env.NODE_ENV !== "development"
+        secure: true,
+        httpOnly: true,
       }
     })
   );
