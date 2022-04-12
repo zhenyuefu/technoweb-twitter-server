@@ -1,0 +1,192 @@
+import express = require("express");
+import User from "../db/models/user.models";
+import bcrypt = require("bcrypt");
+import passport = require("passport");
+import passportlocal = require("passport-local");
+import passportjwt = require("passport-jwt");
+import jwt = require("jsonwebtoken");
+import { ExtractJwt,StrategyOptions } from "passport-jwt";
+
+const LocalStrategy = passportlocal.Strategy;
+const JwtStrategy = passportjwt.Strategy;
+const router = express.Router();
+
+
+// version session------------------------------------------------------------------------
+
+// passport.use(
+//   new LocalStrategy(async function verify(username, password, cb) {
+//     try {
+//       const user = await User.findOne({ username }).exec();
+//       if (!user) {
+//         return cb(null, false, { message: "Incorrect username or password" });
+//       }
+//       const isValid = bcrypt.compareSync(password, user.password);
+//       if (!isValid) {
+//         return cb(null, false, { message: "Incorrect username or password" });
+//       }
+//       return cb(null, {
+//         id: String(user._id),
+//         username: user.username,
+//       });
+//     } catch (error) {
+//       return cb(error);
+//     }
+//   })
+// );
+
+// passport.serializeUser((user, cb) => {
+//   console.log("serializeUser", user);
+//   cb(null, user.id);
+// });
+
+// passport.deserializeUser(async (id, done) => {
+//   try {
+//     const user = await User.findById(id).exec();
+//     if (!user) {
+//       return done(null, false);
+//     }
+//     done(null, { id: String(user._id), username: user.username });
+//   } catch (error) {
+//     done(error);
+//   }
+// });
+
+// router.get("/", (req, res) => {
+//   if (req.isAuthenticated()) {
+//     return res.send({
+//       auth: true,
+//       id: req.user.id,
+//       username: req.user.username,
+//     });
+//   }
+//   return res.send({ auth: false });
+// });
+
+// router.post("/login", (req, res, next) => {
+//   if (req.body.remember) {
+//     // cookies 有效期7天
+//     req.session.cookie.maxAge = 7 * 24 * 3600 * 1000;
+//   }
+
+//   passport.authenticate("local", (err, user, info) => {
+//     if (err) {
+//       return next(err);
+//     }
+//     if (!user) {
+//       return res.status(401).json({ error: info.message });
+//     }
+//     req.logIn(user, (err) => {
+//       if (err) {
+//         return next(err);
+//       }
+//       return res.status(200).json({
+//         message: "Login successful",
+//         uid: user.id,
+//         username: user.username,
+//       });
+//     });
+//   })(req, res, next);
+// });
+
+// router.post("/logout", async (req, res, next) => {
+//   req.logout();
+//   req.session.save((err) => {
+//     if (err) {
+//       return next(err);
+//     }
+//     res.send({ message: "Logout successful" });
+//   });
+// });
+
+// --------------------------------------------------------------------------------------------------
+
+// useJWT -----------------------------------------------------------------------------------------
+const jwt_secret = process.env.JWT_SECRET || "secret";
+const jwt_audience = process.env.JWT_AUDIENCE || "audience";
+const jwt_issuer = process.env.JWT_ISSUER || "issuer";
+
+
+passport.use(new LocalStrategy(async (username, password, done) => {
+  try {
+    const user = await User.findOne({ username }).exec();
+    if (!user) {
+      return done(null, false, { message: "Incorrect username or password" });
+    }
+    const isValid = bcrypt.compareSync(password, user.password);
+    if (!isValid) {
+      return done(null, false, { message: "Incorrect username or password" });
+    }
+    const token = jwt.sign({ uid: String(user._id) },jwt_secret,{
+      expiresIn: '1d',
+      audience: jwt_audience,
+      issuer: jwt_issuer
+    });
+    return done(null, {
+      uid: String(user._id),
+      username: user.username,
+      access_token: "Bearer " + token
+    });
+  } catch (error) {
+    return done(error);
+  }
+}));
+
+
+const jwtOptions:StrategyOptions = {
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: jwt_secret,
+  issuer: jwt_issuer,
+  audience: jwt_audience,
+};
+
+passport.use(new JwtStrategy(jwtOptions ,async function verify(jwtPayload, done) {
+  try {
+    const user = await User.findById(jwtPayload.id).exec();
+    if (!user) {
+      return done(null, false);
+    }
+    return done(null, { 
+      uid: String(user._id), 
+      username: user.username 
+    });
+  } catch (error) {
+    return done(error);
+  }
+}));
+
+router.get("/", (req, res) => {
+  if (req.isAuthenticated()) {
+    return res.send({
+      auth: true,
+      id: req.user.id,
+      username: req.user.username,
+    });
+  }
+  return res.send({ auth: false });
+});
+
+router.post("/login", (req, res, next) => {
+  passport.authenticate("local", {session : false},(err, user, info) => {
+    if (err) {
+      return res.status(500).json({ error: err });
+    }
+    if (!user) {
+      return res.status(422).json({ error: info.message });
+    }
+    req.logIn(user, (err) => {
+      if (err) {
+        return next(err);
+      }
+      return res.status(200).json({
+        message: "Login successful",
+        uid: user.id,
+        username: user.username,
+        access_token: "JWT " + user.access_token
+      });
+    });
+  })(req, res, next);
+});
+
+
+export = router;
