@@ -10,7 +10,7 @@ const router = express.Router();
 passport.use(
   new LocalStrategy(async function verify(username, password, cb) {
     try {
-      const user = await User.findOne({ username }).exec();
+      const user = await User.findOne({ username });
       if (!user) {
         return cb(null, false, { message: "Incorrect username or password" });
       }
@@ -19,7 +19,7 @@ passport.use(
         return cb(null, false, { message: "Incorrect username or password" });
       }
       return cb(null, {
-        id: String(user._id),
+        uid: String(user._id),
         username: user.username,
       });
     } catch (error) {
@@ -30,30 +30,19 @@ passport.use(
 
 passport.serializeUser((user, cb) => {
   console.log("serializeUser", user);
-  cb(null, user.id);
+  cb(null, user.uid);
 });
 
 passport.deserializeUser(async (id, done) => {
   try {
-    const user = await User.findById(id).exec();
+    const user = await User.findById(id);
     if (!user) {
       return done(null, false);
     }
-    done(null, { id: String(user._id), username: user.username });
+    done(null, { uid: String(user._id), username: user.username });
   } catch (error) {
     done(error);
   }
-});
-
-router.get("/", (req, res) => {
-  if (req.isAuthenticated()) {
-    return res.send({
-      auth: true,
-      uid: req.user.id,
-      username: req.user.username,
-    });
-  }
-  return res.send({ auth: false });
 });
 
 router.post("/login", (req, res, next) => {
@@ -67,7 +56,7 @@ router.post("/login", (req, res, next) => {
       return next(err);
     }
     if (!user) {
-      return res.status(401).json({ error: info.message });
+      return res.status(401).json({ message: info.message });
     }
     req.logIn(user, (err) => {
       if (err) {
@@ -75,21 +64,16 @@ router.post("/login", (req, res, next) => {
       }
       return res.status(200).json({
         message: "Login successful",
-        uid: user.id,
+        uid: user.uid,
         username: user.username,
       });
     });
   })(req, res, next);
 });
 
-router.post("/logout", async (req, res, next) => {
+router.post("/logout", async (req, res) => {
   req.logout();
-  req.session.save((err) => {
-    if (err) {
-      return next(err);
-    }
-    res.send({ message: "Logout successful" });
-  });
+  return res.send({ message: "Logout successful" });
 });
 
 export = router;

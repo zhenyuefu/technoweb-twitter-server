@@ -15,4 +15,6 @@ app.listen(port, () => {
   console.log(`http://localhost:${port}`);
 });
 
+console.log("NODE_ENV:", process.env.NODE_ENV);
+
 // module.exports = app;

@@ -1,4 +1,4 @@
-import mongoose = require("../db");
+import mongoose = require("mongoose");
 import bcrypt = require("bcrypt");
 
 interface IUser {

@@ -6,6 +6,7 @@ import path = require("path");
 import passport = require("passport");
 import session = require("express-session");
 import MongoStore = require("connect-mongo");
+import clientP = require("../db/db");
 
 import routes from "../routes";
 
@@ -13,13 +14,6 @@ const SESSION_SECRET = process.env.SESSION_SECRET || "";
 if (!SESSION_SECRET) {
   throw new Error(
     "Please define the SESSION_SECRET environment variable inside .env"
-  );
-}
-
-const uri = process.env.MONGODB_URI || "";
-if (!uri) {
-  throw new Error(
-    "Please define the MONGODB_URI environment variable inside .env"
   );
 }
 
@@ -43,7 +37,7 @@ export = (app: express.Application) => {
       resave: false,
       saveUninitialized: false,
       store: MongoStore.create({
-        mongoUrl: uri,
+        clientPromise:clientP,
         stringify: false,
         // 每天只更新1次
         touchAfter: 24 * 3600,
@@ -51,7 +45,7 @@ export = (app: express.Application) => {
       proxy: true,
       cookie: {
         sameSite: "none",
-        secure: true,
+        secure: process.env.NODE_ENV === "production",
         httpOnly: true,
       }
     })
@@ -62,9 +56,9 @@ export = (app: express.Application) => {
   // 路由
   routes(app);
 
-  // 静态文件
-  app.use(express.static(path.join(__dirname, "../../", "dist")));
-  app.get("/*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../../../", "dist", "/index.html"));
-  });
+  // // 静态文件
+  // app.use(express.static(path.join(__dirname, "../../", "dist")));
+  // app.get("/*", (req, res) => {
+  //   res.sendFile(path.join(__dirname, "../../../", "dist", "/index.html"));
+  // });
 };

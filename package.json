@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "start": "node build/server.js",
-    "dev": "ts-node-dev --clear src/server.ts",
+    "dev": "nodemon src/server.ts",
     "build": "tsc"
   },
   "dependencies": {
@@ -17,7 +17,6 @@
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
     "express-session": "^1.17.2",
-    "mongodb": "^4.5.0",
     "mongoose": "^6.2.10",
     "passport": "^0.5.2",
     "passport-jwt": "^4.0.0",
