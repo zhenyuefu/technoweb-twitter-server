@@ -44,13 +44,14 @@ export = (app: express.Application) => {
       }),
       proxy: true,
       cookie: {
-        sameSite: "none",
+        sameSite:process.env.NODE_ENV === "production"?"none":"lax",
         secure: process.env.NODE_ENV === "production",
         httpOnly: true,
       }
     })
   );
 
+  
   app.use(passport.authenticate("session"));
 
   // 路由
