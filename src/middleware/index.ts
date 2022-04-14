@@ -2,7 +2,7 @@
 
 import express = require("express");
 import cors = require("cors");
-import path = require("path");
+// import path = require("path");
 import passport = require("passport");
 import session = require("express-session");
 import MongoStore = require("connect-mongo");
@@ -37,21 +37,20 @@ export = (app: express.Application) => {
       resave: false,
       saveUninitialized: false,
       store: MongoStore.create({
-        clientPromise:clientP,
+        clientPromise: clientP,
         stringify: false,
         // 每天只更新1次
         touchAfter: 24 * 3600,
       }),
       proxy: true,
       cookie: {
-        sameSite:process.env.NODE_ENV === "production"?"none":"lax",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         secure: process.env.NODE_ENV === "production",
         httpOnly: true,
-      }
+      },
     })
   );
 
-  
   app.use(passport.authenticate("session"));
 
   // 路由
