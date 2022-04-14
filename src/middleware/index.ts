@@ -5,8 +5,27 @@ import cors = require("cors");
 // import path = require("path");
 import passport = require("passport");
 import session = require("express-session");
-import MongoStore = require("connect-mongo");
+// import MongoStore = require("connect-mongo");
+import connectRedis = require("connect-redis");
+const RedisStore = connectRedis(session);
+
 import clientP = require("../db/db");
+
+clientP
+  .then(() => {
+    console.log("Connected to MongoDB");
+  })
+  .catch((err) => {
+    console.log(err);
+  });
+
+import redis = require("redis");
+const createClient = redis.createClient;
+const redisClient = createClient({
+  url: process.env.REDIS_URL,
+  legacyMode: true,
+});
+redisClient.connect().catch(console.error);
 
 import routes from "../routes";
 
@@ -36,11 +55,8 @@ export = (app: express.Application) => {
       secret: SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
-      store: MongoStore.create({
-        clientPromise: clientP,
-        stringify: false,
-        // 每天只更新1次
-        touchAfter: 24 * 3600,
+      store: new RedisStore({
+        client: redisClient,
       }),
       proxy: true,
       cookie: {

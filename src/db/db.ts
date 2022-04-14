@@ -7,18 +7,16 @@ if (!uri) {
   );
 }
 
+const clientP = mongoose.connect(uri).then((m) => m.connection.getClient());
 
-const clientP = mongoose.connect(uri).then(m => m.connection.getClient())
+// mongoose.connection.on("error", err => {
+//   console.error(err);
+//   process.exit(1);
+// });
 
-
-mongoose.connection.on("error", err => {
-  console.error(err);
-  process.exit(1);
-});
-
-mongoose.connection.once("open", () => {
-  console.log("Connected to MongoDB");
-});
+// mongoose.connection.once("open", () => {
+//   console.log("Connected to MongoDB");
+// });
 
 // mongoose
 //   .connect(uri)
