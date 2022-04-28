@@ -1,5 +1,6 @@
 import mongoose = require("mongoose");
 import bcrypt = require("bcrypt");
+import uniqueValidator = require("mongoose-unique-validator");
 
 interface IUser {
   email: string;
@@ -8,6 +9,9 @@ interface IUser {
   firstName?: string;
   lastName?: string;
   updatedAt?: Date;
+  avatar?: string;
+  introduction?: string;
+  bgPicture?: string;
 }
 
 const UserSchema = new mongoose.Schema<IUser>({
@@ -15,6 +19,8 @@ const UserSchema = new mongoose.Schema<IUser>({
     type: String,
     required: true,
     unique: true,
+    index: true,
+    uniqueCaseInsensitive: true,
   },
   password: {
     type: String,
@@ -27,6 +33,8 @@ const UserSchema = new mongoose.Schema<IUser>({
     type: String,
     required: true,
     unique: true,
+    uniqueCaseInsensitive: true,
+    index: true,
   },
   firstName: {
     type: String,
@@ -38,7 +46,18 @@ const UserSchema = new mongoose.Schema<IUser>({
     type: Date,
     default: Date.now,
   },
+  avatar: {
+    type: String,
+  },
+  introduction: {
+    type: String,
+  },
+  bgPicture: {
+    type: String,
+  },
 });
+
+UserSchema.plugin(uniqueValidator);
 
 const User: mongoose.Model<IUser> = mongoose.model("User", UserSchema);
 

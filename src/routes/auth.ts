@@ -8,28 +8,30 @@ const LocalStrategy = passportlocal.Strategy;
 const router = express.Router();
 
 passport.use(
-  new LocalStrategy(async function verify(username, password, cb) {
-    try {
-      const user = await User.findOne({ username });
-      if (!user) {
-        return cb(null, false, { message: "Incorrect username or password" });
+  new LocalStrategy(
+    { usernameField: "email" },
+    async function verify(email, password, cb) {
+      try {
+        const user = await User.findOne({ email: email });
+        if (!user) {
+          return cb(null, false, { message: "Incorrect email or password" });
+        }
+        const isValid = bcrypt.compareSync(password, user.password);
+        if (!isValid) {
+          return cb(null, false, { message: "Incorrect email or password" });
+        }
+        return cb(null, {
+          uid: user._id.toString(),
+          username: user.username,
+        });
+      } catch (error) {
+        return cb(error);
       }
-      const isValid = bcrypt.compareSync(password, user.password);
-      if (!isValid) {
-        return cb(null, false, { message: "Incorrect username or password" });
-      }
-      return cb(null, {
-        uid: String(user._id),
-        username: user.username,
-      });
-    } catch (error) {
-      return cb(error);
     }
-  })
+  )
 );
 
 passport.serializeUser((user, cb) => {
-  console.log("serializeUser", user);
   cb(null, user.uid);
 });
 
