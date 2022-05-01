@@ -38,9 +38,11 @@ const UserSchema = new mongoose.Schema<IUser>({
   },
   firstName: {
     type: String,
+    default: "",
   },
   lastName: {
     type: String,
+    default: "",
   },
   updatedAt: {
     type: Date,

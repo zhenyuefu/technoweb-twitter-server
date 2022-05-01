@@ -80,12 +80,14 @@ router.get("/username", async (req, res) => {
     const name = req.query.username;
     const user = await User.findOne({ username: name });
     if (!user) {
-      return res.status(404).json({
+      return res.status(200).json({
+        exists: false,
         message: "User not found",
       });
     }
     return res.status(200).json({
-      message: "User exists",
+      exists: true,
+      message: "This username is exists",
     });
   } catch (error: any) {
     return res.status(500).json({
@@ -99,11 +101,13 @@ router.get("/email", async (req, res) => {
     const email = req.query.email;
     const user = await User.findOne({ email: email });
     if (!user) {
-      return res.status(404).json({
+      return res.status(200).json({
+        exists: false,
         message: "User not found",
       });
     }
     return res.status(200).json({
+      exists: true,
       message: "This email is already registered",
     });
   } catch (error: any) {
