@@ -50,12 +50,15 @@ const UserSchema = new mongoose.Schema<IUser>({
   },
   avatar: {
     type: String,
+    default: "",
   },
   introduction: {
     type: String,
+    default: "",
   },
   bgPicture: {
     type: String,
+    default: "",
   },
 });
 

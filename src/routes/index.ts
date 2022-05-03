@@ -2,6 +2,7 @@ import express = require("express");
 import userRouter from "./user";
 import authRouter from "./auth";
 import postRouter from "./post";
+import commentRouter from "./comment";
 
 const routes: (app: express.Application) => void = (app) => {
   app.all("/api", (req, res) => {
@@ -11,6 +12,7 @@ const routes: (app: express.Application) => void = (app) => {
   app.use("/api/user", userRouter);
   app.use("/api/auth", authRouter);
   app.use("/api/post", postRouter);
+  app.use("/api/comment", commentRouter);
 };
 
 export = routes;
