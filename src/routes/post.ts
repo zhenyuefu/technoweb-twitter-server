@@ -10,7 +10,7 @@ router.post("/", async (req, res) => {
     });
   }
   const userid = req.user?.uid;
-  if (!req.body.content || req.body.content.length > 500) {
+  if (!req.body.content && req.body.images.length === 0 || req.body.content.length > 500) {
     return res.status(400).json({
       message: "Content must be between 1 and 500 characters",
     });

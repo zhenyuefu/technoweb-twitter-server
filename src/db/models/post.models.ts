@@ -34,7 +34,7 @@ interface IImage {
 
 interface IPost {
   author?: ObjectId;
-  content: string;
+  content?: string;
   imagePath?: Types.Array<IImage>;
   createAt?: Date;
   comments?: Types.ArraySubdocument;
@@ -64,7 +64,6 @@ const postSchema = new Schema<IPost, IPostModel>({
   content: {
     type: String,
     max: 500,
-    required: true,
   },
   imagePath: {
     type: Array,
