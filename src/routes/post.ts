@@ -10,7 +10,10 @@ router.post("/", async (req, res) => {
     });
   }
   const userid = req.user?.uid;
-  if (!req.body.content && req.body.images.length === 0 || req.body.content.length > 500) {
+  if (
+    (!req.body.content && req.body.images.length === 0) ||
+    req.body.content.length > 500
+  ) {
     return res.status(400).json({
       message: "Content must be between 1 and 500 characters",
     });
@@ -25,7 +28,7 @@ router.post("/", async (req, res) => {
       return res.status(200).json({
         message: "Post added successfully",
         post: newPost,
-      })
+      });
     }
   } catch (err) {
     console.log(err);
@@ -49,5 +52,32 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.patch("/:postId/comment", (req, res) => {
+  if (req.isUnauthenticated())
+    return res.status(401).json({
+      message: "You must be logged in to comment",
+    });
+
+  const userId = req.user?.uid;
+  const postId = req.params.postId;
+  const content = req.body.content;
+  if (!userId || !postId || !content)
+    return res.status(400).json({
+      message: "Missing required fields",
+    });
+  Post.addComment(postId, userId, content)
+    .then((post) => {
+      if (!post)
+        return res.status(404).json({
+          message: "Post not found",
+        });
+      res.status(200).json({
+        message: "Comment added",
+      });
+    })
+    .catch((err) => {
+      res.status(500).json(err);
+    });
+});
 
 export = router;
