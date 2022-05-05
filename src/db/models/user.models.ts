@@ -9,6 +9,7 @@ interface IUser {
   firstName?: string;
   lastName?: string;
   updatedAt?: Date;
+  createAt?: Date;
   avatar?: string;
   introduction?: string;
   bgPicture?: string;
@@ -45,6 +46,10 @@ const UserSchema = new mongoose.Schema<IUser>({
     default: "",
   },
   updatedAt: {
+    type: Date,
+    default: Date.now,
+  },
+  createAt: {
     type: Date,
     default: Date.now,
   },
