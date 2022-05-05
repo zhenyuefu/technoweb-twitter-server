@@ -5,7 +5,7 @@ import User from "../db/models/user.models";
 const router = express.Router();
 
 router.post("/", async (req, res, next) => {
-  const {username, password, email, firstName, lastName} = req.body;
+  const { username, password, email, firstName, lastName } = req.body;
   if (!username || !password || !email) {
     return res.status(422).json({
       message: "username, password, email are required",
@@ -23,18 +23,18 @@ router.post("/", async (req, res, next) => {
       {
         uid: newUser._id.toString(),
         username: newUser.username,
-      }, function (err) {
+      },
+      function (err) {
         if (err) {
           return next(err);
         }
         return res.status(201).json({
-            message: "User created successful !",
-            username: newUser.username,
-            uid: String(newUser._id),
-          }
-        );
-
-      });
+          message: "User created successful !",
+          username: newUser.username,
+          uid: String(newUser._id),
+        });
+      }
+    );
   } catch (error: any) {
     return res.status(500).json({
       message: error.message,

@@ -7,9 +7,10 @@ import passport = require("passport");
 import session = require("express-session");
 // import MongoStore = require("connect-mongo");
 import connectRedis = require("connect-redis");
-const RedisStore = connectRedis(session);
-
 import clientP = require("../db/db");
+import redis = require("redis");
+
+const RedisStore = connectRedis(session);
 
 clientP
   .then(() => {
@@ -19,7 +20,6 @@ clientP
     console.log(err);
   });
 
-import redis = require("redis");
 const createClient = redis.createClient;
 const redisClient = createClient({
   url: process.env.REDIS_URL,
@@ -60,8 +60,8 @@ export = (app: express.Application) => {
       }),
       proxy: true,
       cookie: {
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        secure: process.env.NODE_ENV === "production",
+        // sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        // secure: process.env.NODE_ENV === "production",
         httpOnly: true,
       },
     })
