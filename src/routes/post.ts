@@ -1,4 +1,5 @@
 import express = require("express");
+import { ObjectId } from "mongoose";
 import Post from "../db/models/post.models";
 import User from "../db/models/user.models";
 
@@ -51,8 +52,8 @@ router.get("/", async (req, res) => {
         message: "User not found",
       });
     }
-    const userIds = user.following?.map((follow) => follow.toString()) || [];
-    userIds.push(uid);
+    const userIds = user.following || [];
+    userIds.push(<ObjectId>(<unknown>uid));
     const posts = await Post.getPosts(userIds);
     return res.status(200).json(posts);
   } catch (err) {

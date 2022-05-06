@@ -18,7 +18,7 @@ interface IPost {
 interface IPostModel extends Model<IPost> {
   addPost(userid: string, post: IPost): Promise<IPost>;
 
-  getPosts(userids: string[]): Promise<IPost[]>;
+  getPosts(userids: ObjectId[]): Promise<IPost[]>;
 
   deletePost(postId: string): Promise<IPost>;
 
@@ -83,7 +83,7 @@ postSchema.statics.deletePost = async function (postID: string) {
   return Post.findByIdAndUpdate(postID, { isDelete: true }, { new: true });
 };
 
-postSchema.statics.getPosts = async function (userIds: string[]) {
+postSchema.statics.getPosts = async function (userIds: ObjectId[]) {
   return Post.find({ author: { $in: userIds }, isDelete: false })
     .populate("author", "username firstName lastName avatar")
     .populate("comments.author")
