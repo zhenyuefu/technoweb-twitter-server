@@ -45,14 +45,13 @@ router.get("/", async (req, res) => {
   }
   const uid = req.user?.uid || "";
   try {
-    const user = await User.findById(uid).select("followers");
+    const user = await User.findById(uid).select("following");
     if (!user) {
       return res.status(404).json({
         message: "User not found",
       });
     }
-    const userIds =
-      user.followers?.map((follower) => follower.toString()) || [];
+    const userIds = user.following?.map((follow) => follow.toString()) || [];
     userIds.push(uid);
     const posts = await Post.getPosts(userIds);
     return res.status(200).json(posts);
