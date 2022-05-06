@@ -1,5 +1,6 @@
 import express = require("express");
 import Post from "../db/models/post.models";
+import User from "../db/models/user.models";
 
 const router = express.Router();
 
@@ -42,9 +43,18 @@ router.get("/", async (req, res) => {
       message: "Please log in first",
     });
   }
-
+  const uid = req.user?.uid || "";
   try {
-    const posts = await Post.getPosts(<string>req.user?.uid);
+    const user = await User.findById(uid).select("followers");
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+    const userIds =
+      user.followers?.map((follower) => follower.toString()) || [];
+    userIds.push(uid);
+    const posts = await Post.getPosts(userIds);
     return res.status(200).json(posts);
   } catch (err) {
     console.log(err);

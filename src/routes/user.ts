@@ -118,4 +118,110 @@ router.get("/email", async (req, res) => {
   }
 });
 
+router.patch("/follow/:uid", async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  const { uid: followId } = req.params;
+  const userId = req.user.uid;
+  if (!followId || !userId) {
+    return res.status(422).json({
+      message: "uid missing",
+    });
+  }
+  if (followId === userId) {
+    return res.status(422).json({
+      message: "You can't follow yourself",
+    });
+  }
+  const session = await User.startSession();
+  try {
+    session.startTransaction();
+    const opt = { session, new: true };
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $addToSet: { following: followId } },
+      opt
+    );
+    const follower = await User.findByIdAndUpdate(
+      followId,
+      { $addToSet: { followers: userId } },
+      opt
+    );
+    if (!user || !follower) {
+      await session.abortTransaction();
+      await session.endSession();
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+    await session.commitTransaction();
+    await session.endSession();
+    return res.status(200).json({
+      message: "success",
+      success: true,
+    });
+  } catch (error: any) {
+    await session.abortTransaction();
+    return res.status(500).json({
+      message: error.message,
+    });
+  } finally {
+    await session.endSession();
+  }
+});
+
+router.patch("/unfollow/:uid", async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  const { uid: followId } = req.params;
+  const userId = req.user.uid;
+  if (!followId || !userId) {
+    return res.status(422).json({
+      message: "uid missing",
+    });
+  }
+  if (followId === userId) {
+    return res.status(422).json({
+      message: "You can't unfollow yourself",
+    });
+  }
+  const session = await User.startSession();
+  try {
+    session.startTransaction();
+    const opt = { session, new: true };
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $pull: { following: followId } },
+      opt
+    );
+    const follower = await User.findByIdAndUpdate(
+      followId,
+      { $pull: { followers: userId } },
+      opt
+    );
+    if (!user || !follower) {
+      await session.abortTransaction();
+      await session.endSession();
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+    await session.commitTransaction();
+    await session.endSession();
+    return res.status(200).json({
+      message: "success",
+      success: true,
+    });
+  } catch (error: any) {
+    await session.abortTransaction();
+    return res.status(500).json({
+      message: error.message,
+    });
+  } finally {
+    await session.endSession();
+  }
+});
+
 export = router;

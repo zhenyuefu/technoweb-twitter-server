@@ -1,8 +1,9 @@
 import mongoose = require("mongoose");
 import bcrypt = require("bcrypt");
 import uniqueValidator = require("mongoose-unique-validator");
+import { ObjectId, Types } from "mongoose";
 
-interface IUser {
+export interface IUser {
   email: string;
   password: string;
   username: string;
@@ -13,6 +14,8 @@ interface IUser {
   avatar?: string;
   introduction?: string;
   bgPicture?: string;
+  following?: ObjectId[];
+  followers?: ObjectId[];
 }
 
 const UserSchema = new mongoose.Schema<IUser>({
@@ -65,10 +68,20 @@ const UserSchema = new mongoose.Schema<IUser>({
     type: String,
     default: "",
   },
+  followers: {
+    type: Types.ObjectId,
+    ref: "User",
+    default: [],
+  },
+  following: {
+    type: Types.ObjectId,
+    ref: "User",
+    default: [],
+  },
 });
 
 UserSchema.plugin(uniqueValidator);
 
-const User: mongoose.Model<IUser> = mongoose.model("User", UserSchema);
+export const User: mongoose.Model<IUser> = mongoose.model("User", UserSchema);
 
-export = User;
+export default User;
