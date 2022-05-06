@@ -58,8 +58,11 @@ router.get("/profile", async (req, res) => {
   }
   try {
     const username = req.query.username;
+    const uid = req.query.uid;
 
-    const user = await User.findOne({ username: username }).select("-password");
+    const user = await User.findOne({
+      $or: [{ username: username }, { _id: uid }],
+    }).select("-password");
     if (!user) {
       return res.status(404).json({
         message: "User not found",

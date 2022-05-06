@@ -22,7 +22,9 @@ router.get("/", async (req, res) => {
     }).select("username avatar firstName lastName");
     const posts = await Post.find({
       $text: { $search: text as string },
-    }).populate("author", "username avatar firstName lastName");
+    })
+      .populate("author", "username avatar firstName lastName")
+      .populate("comments.author", "username avatar firstName lastName");
     return res.status(200).json({
       users,
       posts,

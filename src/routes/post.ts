@@ -45,6 +45,7 @@ router.get("/", async (req, res) => {
     });
   }
   const uid = req.user?.uid || "";
+  const author = req.query.author || "";
   try {
     const user = await User.findById(uid).select("following");
     if (!user) {
@@ -54,7 +55,7 @@ router.get("/", async (req, res) => {
     }
     const userIds = user.following || [];
     userIds.push(<ObjectId>(<unknown>uid));
-    const posts = await Post.getPosts(userIds);
+    const posts = await Post.getPosts(userIds, author as string);
     return res.status(200).json(posts);
   } catch (err) {
     console.log(err);
