@@ -68,16 +68,20 @@ const UserSchema = new mongoose.Schema<IUser>({
     type: String,
     default: "",
   },
-  followers: {
-    type: Types.ObjectId,
-    ref: "User",
-    default: [],
-  },
-  following: {
-    type: Types.ObjectId,
-    ref: "User",
-    default: [],
-  },
+  followers: [
+    {
+      type: Types.ObjectId,
+      ref: "User",
+      default: [],
+    },
+  ],
+  following: [
+    {
+      type: Types.ObjectId,
+      ref: "User",
+      default: [],
+    },
+  ],
 });
 
 UserSchema.plugin(uniqueValidator);
