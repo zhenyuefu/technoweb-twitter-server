@@ -84,7 +84,7 @@ postSchema.statics.deletePost = async function (postID: string) {
 };
 
 postSchema.statics.getPosts = async function (userIds: string[]) {
-  return Post.find({ author: { $in: [userIds] }, isDelete: false })
+  return Post.find({ author: { $in: userIds }, isDelete: false })
     .populate("author", "username firstName lastName avatar")
     .populate("comments.author")
     .populate("comments.comments")
