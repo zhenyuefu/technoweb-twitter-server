@@ -91,4 +91,52 @@ router.patch("/:postId/comment", (req, res) => {
     });
 });
 
+router.patch("/:postId/like", (req, res) => {
+  if (req.isUnauthenticated()) {
+    return res.status(401).json({
+      message: "You must be logged in first",
+    });
+  }
+  const userId = req.user?.uid;
+  const postId = req.params.postId;
+
+  if (!userId || !postId)
+    return res.status(400).json({
+      message: "Missing required fields",
+    });
+  Post.likePost(postId, userId)
+    .then(() => {
+      res.status(200).json({
+        message: "Liked successful",
+      });
+    })
+    .catch((err) => {
+      res.status(500).json(err);
+    });
+});
+
+router.patch("/:postId/unlike", (req, res) => {
+  if (req.isUnauthenticated()) {
+    return res.status(401).json({
+      message: "You must be logged in first",
+    });
+  }
+  const userId = req.user?.uid;
+  const postId = req.params.postId;
+
+  if (!userId || !postId)
+    return res.status(400).json({
+      message: "Missing required fields",
+    });
+  Post.unlikePost(postId, userId)
+    .then(() => {
+      res.status(200).json({
+        message: "Unliked successful",
+      });
+    })
+    .catch((err) => {
+      res.status(500).json(err);
+    });
+});
+
 export = router;

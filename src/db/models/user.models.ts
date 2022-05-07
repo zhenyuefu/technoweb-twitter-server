@@ -16,6 +16,7 @@ export interface IUser {
   bgPicture?: string;
   following?: ObjectId[];
   followers?: ObjectId[];
+  likes?: ObjectId[];
 }
 
 const UserSchema = new mongoose.Schema<IUser>({
@@ -79,6 +80,13 @@ const UserSchema = new mongoose.Schema<IUser>({
     {
       type: Types.ObjectId,
       ref: "User",
+      default: [],
+    },
+  ],
+  likes: [
+    {
+      type: Types.ObjectId,
+      ref: "Post",
       default: [],
     },
   ],

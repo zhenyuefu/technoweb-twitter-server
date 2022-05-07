@@ -1,6 +1,9 @@
 import { Model, model, ObjectId, Schema, Types } from "mongoose";
 import { commentSchema } from "./comment.models";
 import { IImage } from "../../types";
+import User from "./user.models";
+import { ClientSession } from "mongodb";
+import assert from "assert";
 
 interface IPost {
   author?: ObjectId;
@@ -23,6 +26,10 @@ interface IPostModel extends Model<IPost> {
   deletePost(postId: string): Promise<IPost>;
 
   addComment(postId: string, userid: string, comment: string): Promise<IPost>;
+
+  likePost(postId: string, userid: string): Promise<void>;
+
+  unlikePost(postId: string, userid: string): Promise<void>;
 }
 
 const postSchema = new Schema<IPost, IPostModel>({
@@ -89,42 +96,78 @@ postSchema.statics.getPosts = async function (userIds, author) {
       .populate("author", "username firstName lastName avatar")
       .populate("comments.author", "username firstName lastName avatar")
       .populate("comments.comments")
-      .populate("likes")
-      .populate("reTweet")
       .sort({ createAt: -1 });
   }
   return this.find({ author: { $in: userIds }, isDelete: false })
     .populate("author", "username firstName lastName avatar")
     .populate("comments.author", "username firstName lastName avatar")
     .populate("comments.comments")
-    .populate("likes")
-    .populate("reTweet")
     .sort({ createAt: -1 });
 };
 
 postSchema.statics.likePost = async function (postID: string, userid: string) {
-  return Post.findByIdAndUpdate(
-    postID,
-    {
-      $addToSet: { likes: userid },
-      $inc: { countLikes: 1 },
-    },
-    { new: true }
-  );
+  let session: ClientSession | null = null;
+  return this.startSession()
+    .then((_session) => {
+      session = _session;
+      session.startTransaction();
+      return this.findByIdAndUpdate(
+        postID,
+        {
+          $addToSet: { likes: userid },
+          $inc: { countLikes: 1 },
+        },
+        { new: true, session: session }
+      );
+    })
+    .then(() =>
+      User.findByIdAndUpdate(userid, { $addToSet: { likes: postID } }).session(
+        session
+      )
+    )
+    .then((doc) => assert.ok(doc))
+    .then(() => session?.commitTransaction())
+    .then(() => session?.endSession())
+    .catch(() => {
+      if (session) {
+        session.abortTransaction();
+        session.endSession();
+      }
+    });
 };
 
 postSchema.statics.unlikePost = async function (
   postID: string,
   userid: string
 ) {
-  return Post.findByIdAndUpdate(
-    postID,
-    {
-      $pull: { likes: userid },
-      $inc: { countLikes: -1 },
-    },
-    { new: true }
-  );
+  let session: ClientSession | null = null;
+  return this.startSession()
+    .then((_session) => {
+      session = _session;
+      session.startTransaction();
+      return this.findByIdAndUpdate(
+        postID,
+        {
+          $pull: { likes: userid },
+          $inc: { countLikes: -1 },
+        },
+        { new: true, session: session }
+      );
+    })
+    .then(() =>
+      User.findByIdAndUpdate(userid, { $addToSet: { likes: postID } }).session(
+        session
+      )
+    )
+    .then((doc) => assert.ok(doc))
+    .then(() => session?.commitTransaction())
+    .then(() => session?.endSession())
+    .catch(() => {
+      if (session) {
+        session.abortTransaction();
+        session.endSession();
+      }
+    });
 };
 
 postSchema.statics.addComment = async function (
