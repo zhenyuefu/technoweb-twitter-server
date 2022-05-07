@@ -79,6 +79,51 @@ router.get("/profile", async (req, res) => {
   }
 });
 
+router.patch("/profile", async (req, res) => {
+  if (req.isUnauthenticated()) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  const uid = req.user?.uid;
+  const { avatar, bgPicture, introduction } = req.body;
+  let updateBlock = {};
+  if (avatar) {
+    updateBlock = { ...updateBlock, avatar };
+  }
+  if (bgPicture) {
+    updateBlock = { ...updateBlock, bgPicture };
+  }
+  if (introduction) {
+    updateBlock = { ...updateBlock, introduction };
+  }
+  if (Object.keys(updateBlock).length === 0) {
+    return res.status(422).json({
+      message: "No update data",
+    });
+  }
+  try {
+    const user = await User.findByIdAndUpdate(
+      uid,
+      {
+        $set: updateBlock,
+      },
+      { new: true }
+    ).select("-password");
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+    return res.status(200).json({
+      message: "success",
+      user: user,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+});
+
 router.get("/username", async (req, res) => {
   try {
     const name = req.query.username;
