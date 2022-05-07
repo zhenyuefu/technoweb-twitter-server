@@ -87,7 +87,7 @@ postSchema.statics.getPosts = async function (userIds, author) {
   if (author) {
     return this.find({ author: author, isDelete: false })
       .populate("author", "username firstName lastName avatar")
-      .populate("comments.author")
+      .populate("comments.author", "username firstName lastName avatar")
       .populate("comments.comments")
       .populate("likes")
       .populate("reTweet")
@@ -95,7 +95,7 @@ postSchema.statics.getPosts = async function (userIds, author) {
   }
   return this.find({ author: { $in: userIds }, isDelete: false })
     .populate("author", "username firstName lastName avatar")
-    .populate("comments.author")
+    .populate("comments.author", "username firstName lastName avatar")
     .populate("comments.comments")
     .populate("likes")
     .populate("reTweet")
