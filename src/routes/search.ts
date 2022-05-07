@@ -11,6 +11,11 @@ router.get("/", async (req, res) => {
     });
   }
   const text = req.query.text;
+  if (!text) {
+    return res.status(422).json({
+      message: "No text provided",
+    });
+  }
   try {
     const reg = new RegExp(text as string, "i");
     const users = await User.find({
