@@ -111,29 +111,32 @@ postSchema.statics.likePost = async function (postID: string, userid: string) {
     .then((_session) => {
       session = _session;
       session.startTransaction();
-      return this.findByIdAndUpdate(
-        postID,
+      return this.findOneAndUpdate(
+        { _id: postID, likes: { $ne: userid } },
         {
-          $addToSet: { likes: userid },
+          $push: { likes: userid },
           $inc: { countLikes: 1 },
         },
         { new: true, session: session }
       );
+    })
+    .then((doc) => {
+      assert(doc, "Already liked");
+      console.log(doc);
     })
     .then(() =>
       User.findByIdAndUpdate(userid, { $addToSet: { likes: postID } }).session(
         session
       )
     )
-    .then((doc) => assert.ok(doc))
+    .then((doc) => assert(doc, "User not found"))
     .then(() => session?.commitTransaction())
-    .then(() => session?.endSession())
-    .catch(() => {
-      if (session) {
-        session.abortTransaction();
-        session.endSession();
-      }
-    });
+    .catch(async (err) => {
+      console.log(err);
+      await session?.abortTransaction();
+      throw { message: err.message };
+    })
+    .finally(() => session?.endSession());
 };
 
 postSchema.statics.unlikePost = async function (
@@ -145,8 +148,8 @@ postSchema.statics.unlikePost = async function (
     .then((_session) => {
       session = _session;
       session.startTransaction();
-      return this.findByIdAndUpdate(
-        postID,
+      return this.findOneAndUpdate(
+        { _id: postID, likes: { $eq: userid } },
         {
           $pull: { likes: userid },
           $inc: { countLikes: -1 },
@@ -154,20 +157,21 @@ postSchema.statics.unlikePost = async function (
         { new: true, session: session }
       );
     })
+    .then((doc) => assert(doc, "Already unliked"))
     .then(() =>
-      User.findByIdAndUpdate(userid, { $addToSet: { likes: postID } }).session(
+      User.findByIdAndUpdate(userid, { $pull: { likes: postID } }).session(
         session
       )
     )
     .then((doc) => assert.ok(doc))
     .then(() => session?.commitTransaction())
     .then(() => session?.endSession())
-    .catch(() => {
-      if (session) {
-        session.abortTransaction();
-        session.endSession();
-      }
-    });
+    .catch(async (err) => {
+      console.log(err.message);
+      await session?.abortTransaction();
+      throw { message: err.message };
+    })
+    .finally(() => session?.endSession());
 };
 
 postSchema.statics.addComment = async function (
