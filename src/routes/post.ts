@@ -63,6 +63,29 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/:id", async (req, res) => {
+  if (req.isUnauthenticated()) {
+    return res.status(401).json({
+      message: "Please log in first",
+    });
+  }
+  const id = req.params.id;
+  try {
+    const post = await Post.findById(id)
+      .populate("author", "username firstName lastName avatar")
+      .populate("comments.author", "username firstName lastName avatar");
+    if (!post) {
+      return res.status(404).json({
+        message: "Post not found",
+      });
+    }
+    return res.status(200).json(post);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json(err);
+  }
+});
+
 router.patch("/:postId/comment", (req, res) => {
   if (req.isUnauthenticated())
     return res.status(401).json({
