@@ -27,7 +27,8 @@ https://apitw.fuzy.tech
    MONGODB_URI=<your_mongodb_url>
    SESSION_SECRET=<your_secret>
    REDIS_URL=<your_redis_connection_url_for_example:redis://127.0.0.1:6379>
-   // redis used to store the session, if you don't want to use it , delete "store" option of app.use(session) in middleware/index.ts, you can also store in mongodb with package "connect-mongo"
+   // redis used to store the session, if you don't want to use it , delete "store" option of app.use(session) in middleware/index.ts.
+   // you can also store the session in mongodb with package "connect-mongo", uncomment "store" option with mongo at the same place avobe.
    // see https://github.com/jdesboeufs/connect-mongo
    ```
 

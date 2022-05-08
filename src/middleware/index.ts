@@ -5,6 +5,7 @@ import cors = require("cors");
 // import path = require("path");
 import passport = require("passport");
 import session = require("express-session");
+// replace with this to use mongodb to save session
 // import MongoStore = require("connect-mongo");
 import connectRedis = require("connect-redis");
 import clientP = require("../db/db");
@@ -58,6 +59,13 @@ export = (app: express.Application) => {
       store: new RedisStore({
         client: redisClient,
       }),
+      // replace with is for mongodb
+      //store: MongoStore.create({
+      //          clientPromise: clientP,
+      //          stringify: false,
+      //
+      //          touchAfter: 24 * 3600,
+      //        }),
       proxy: true,
       cookie: {
         // sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
