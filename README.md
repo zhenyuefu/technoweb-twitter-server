@@ -12,6 +12,41 @@ Le code du serveur est maintenant hébergé sur heroku
 https://apitw.fuzy.tech
 ```
 
+### Exécuter sur votre ordinateur
+
+1. Clone this repo
+
+   ```sh
+   git clone https://github.com/zhenyuefu/technoweb-twitter-server.git
+   ```
+
+2. Créer un fichier .env à la racine du projet. Les variables d'environnement suivantes doivent être incluses dans le fichier
+
+   ```
+   PORT=<default_8000>
+   MONGODB_URI=<your_mongodb_url>
+   SESSION_SECRET=<your_secret>
+   REDIS_URL=<your_redis_connection_url_for_example:redis://127.0.0.1:6379>
+   // redis used to store the session, if you don't want to use it , delete "store" option of app.use(session) in middleware/index.ts, you can also store in mongodb with package "connect-mongo"
+   // see https://github.com/jdesboeufs/connect-mongo
+   ```
+
+3. Pour mongodb, je recommande d'utiliser [l'atlas](https://www.mongodb.com/atlas/database) en ligne. Si vous utilisez un mongodb local, veuillez vous assurer que votre `mongod instances` est un `ReplicaSet`. See [Deploy a Replica Set for Testing and Development](https://www.mongodb.com/docs/manual/tutorial/deploy-replica-set-for-testing/)
+
+4. run yarn pour installer toutes les dépendances
+
+   ```
+   yarn
+   ```
+
+5. Maintenant, votre serveur est lance.
+
+   ```
+   yarn dev
+   ```
+
+### Description
+
 ##### Architecture du code 
 
 ```
